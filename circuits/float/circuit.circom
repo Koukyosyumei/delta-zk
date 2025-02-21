@@ -61,7 +61,7 @@ template FloatAdd() {
 
     // 计算对齐精度后的两个操作数
     swf.sel <== gtd.out;
-    swf.L <-- fac;
+    swf.L <== fac;
     swf.R <== 1;
     left <== swf.outL * l[0];
     right <== swf.outR * r[0];

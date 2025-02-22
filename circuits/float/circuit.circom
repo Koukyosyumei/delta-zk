@@ -36,6 +36,26 @@ template FloatMultiSign() {
     p[1] <== fm.p[1];
 }
 
+template Pow10(exponent_bits) {
+    signal input d;
+    signal output out;
+    
+    component bits = Num2Bits(exponent_bits);
+    bits.in <== d;
+
+    signal accumulator[exponent_bits+1];
+    accumulator[0] <== 1;
+
+    var squared, squared_times_a;
+    for (var i=0; i < exponent_bits; i++) {
+        squared = accumulator[i] * accumulator[i];
+        squared_times_a = squared * 10;
+        accumulator[i+1] <== bits.out[i] * (squared_times_a - squared) + squared;
+    }
+    
+    out <== accumulator[exponent_bits];
+}
+
 // 浮点数加法，输入无符号，输出无符号
 template FloatAdd() {
     signal input l[2];
@@ -57,11 +77,12 @@ template FloatAdd() {
     swd.R <== r[1];
 
     var d = swd.outR - swd.outL;
-    var fac = 10**d;
+    component fac = Pow10(10)
+    fac.d <== d;
 
     // 计算对齐精度后的两个操作数
     swf.sel <== gtd.out;
-    swf.L <== fac;
+    swf.L <== fac.out;
     swf.R <== 1;
     left <== swf.outL * l[0];
     right <== swf.outR * r[0];
